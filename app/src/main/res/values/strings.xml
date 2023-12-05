@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Dizimo_e_salario</string>
+
+    <string-array name="tipos_de_movimentacao">
+        <item>Pagamento</item>
+        <item>Recebimento</item>
+        <item>Dízimo</item>
+        <item>Gasto pessoal</item>
+    </string-array>
+</resources>
