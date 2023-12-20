@@ -11,8 +11,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="5sp"
-        android:text="Salário restante"
+        android:text="Salário"
         android:textSize="24sp"
+        android:textColor="@color/black"
         app:layout_constraintEnd_toStartOf="@+id/titulo_dizimo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,27 +23,29 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="5sp"
-        android:text="Dízimo pendente"
+        android:text="Dízimo"
+        android:textColor="@color/black"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/titulo_salario"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/dizimo_pendente"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@+id/titulo_dizimo"
-        app:layout_constraintStart_toEndOf="@id/salario_restante"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:id="@+id/dizimo_pendente"
         android:layout_margin="5sp"
-        />
+        android:textSize="22sp"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/salario_restante"
+        app:layout_constraintTop_toBottomOf="@+id/titulo_dizimo" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18sp"
+        android:textSize="22sp"
+        android:textColor="@color/black"
         app:layout_constraintTop_toBottomOf="@+id/titulo_salario"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/dizimo_pendente"
@@ -55,20 +58,24 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="5sp"
-        android:layout_marginTop="100sp"
         android:text="Tipo de movimentação"
         android:textSize="20sp"
+        android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/salario_restante" />
 
     <Spinner
         android:id="@+id/spinner_tipo_de_movimentacao"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="25sp"
         android:layout_margin="5sp"
         android:scrollbarSize="20sp"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toTopOf="@+id/titulo_valor"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/titulo_tipo_de_movimentacao" />
 
@@ -77,9 +84,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="5sp"
-        android:layout_marginTop="15sp"
+        android:layout_marginTop="16dp"
         android:text="Valor"
+        android:textColor="@color/black"
         android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/valor_movimentado"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/spinner_tipo_de_movimentacao" />
@@ -89,50 +98,29 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="5sp"
+        android:inputType="number"
         android:textSize="25sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/titulo_valor" />
-
-<!--    <TextView-->
-<!--        android:id="@+id/titulo_descricao"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_margin="5sp"-->
-<!--        android:layout_marginTop="15sp"-->
-<!--        android:text="Descrição"-->
-<!--        android:textSize="15sp"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toBottomOf="@id/valor_movimentado" />-->
-
-<!--    <EditText-->
-<!--        android:id="@+id/descricao"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_margin="5sp"-->
-<!--        android:hint="Descreva a movimentação"-->
-<!--        android:textSize="12sp"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toBottomOf="@id/titulo_descricao" />-->
 
     <Button
         android:id="@+id/botao_registrar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="5sp"
-        android:layout_marginTop="20sp"
+        android:layout_marginTop="32dp"
         android:text="Registrar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/valor_movimentado" />
+        app:layout_constraintTop_toBottomOf="@+id/edit_descricao" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Histórico"
         android:textSize="15sp"
+        android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/botao_historico"
@@ -146,7 +134,31 @@
         android:src="?android:attr/actionModeFindDrawable"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-
         app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/edit_descricao"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="Descrição da movimentação"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/titulo_descricao" />
+
+    <TextView
+        android:id="@+id/titulo_descricao"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Descrição"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/valor_movimentado" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
