@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "565435319792",
+    "project_id": "dizimo-e-salario",
+    "storage_bucket": "dizimo-e-salario.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:565435319792:android:b9a076c93f1d4e81704935",
+        "android_client_info": {
+          "package_name": "com.dizimo_e_salario"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDiB_u-0f668f6Y8CC15IPJsU1FHP7Utok"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
