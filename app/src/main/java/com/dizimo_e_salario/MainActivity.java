@@ -23,7 +23,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,11 +44,16 @@ public class MainActivity extends AppCompatActivity {
     ImageButton botaoHistoricoDeMovimentacoes;
 
     public static final String MOVIMENTACOES_FINANCEIRAS = "Movimentações financeiras";
+    public static final String INFORMACOES_PRINCIPAIS = "Informações principais";
 
+    public static final String SALARIO_RESTANTE = "Salário restante";
+    public static final String DIZIMO_PENDENTE = "Dízimo pendente";
+    FirebaseFirestore db;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        db = FirebaseFirestore.getInstance();
 
         SharedPreferences sharedPreferences = getSharedPreferences("saldos", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -61,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
             editor.putFloat(CHAVE_SALARIO, SALARIO_RESTANTE_PADRAO);
             editor.apply();
         }
-
         tituloValorDaMovimentacao = findViewById(R.id.titulo_valor);
         tituloTipoDaMovimentacao = findViewById(R.id.titulo_tipo_de_movimentacao);
         tituloDizimo = findViewById(R.id.titulo_dizimo);
@@ -119,15 +126,15 @@ public class MainActivity extends AppCompatActivity {
                 float valorMovimentado = Float.parseFloat(FormatadorValor.VALOR_COM_SIMBOLO.desformata(edtTxtValorDaMovimentacao.getText().toString()));
 //                float saldo = sharedPreferences.getFloat(CHAVE_SALDO, SALDO_PADRAO);
 
-                if (spnTiposDeMovimentacao.getSelectedItem().toString().equals("Saída")){
+                if (spnTiposDeMovimentacao.getSelectedItem().toString().equals("Saída")) {
 //                    saldo = saldo - (Float.parseFloat(valorDaMovimentacao.getText().toString())/100);
-                    dizimoPendente = (dizimoPendente - (valorMovimentado*(float)0.1));
-                    salarioRestante = (salarioRestante - (valorMovimentado*(float)0.72));
+                    dizimoPendente = (dizimoPendente - (valorMovimentado * (float) 0.1));
+                    salarioRestante = (salarioRestante - (valorMovimentado * (float) 0.72));
 
                 } else if (spnTiposDeMovimentacao.getSelectedItem().toString().equals("Entrada")) {
 //                    saldo = saldo + (Float.parseFloat(valorDaMovimentacao.getText().toString())/100);
-                    dizimoPendente =  (dizimoPendente + (valorMovimentado*(float)0.1));
-                    salarioRestante = (salarioRestante + (valorMovimentado*(float)0.72));
+                    dizimoPendente = (dizimoPendente + (valorMovimentado * (float) 0.1));
+                    salarioRestante = (salarioRestante + (valorMovimentado * (float) 0.72));
 
                 } else if (spnTiposDeMovimentacao.getSelectedItem().toString().equals("Dar dízimo")) {
 //                    saldo = saldo - (Float.parseFloat(valorDaMovimentacao.getText().toString())/100);
@@ -142,25 +149,34 @@ public class MainActivity extends AppCompatActivity {
                 editor.putFloat(CHAVE_SALARIO, salarioRestante);
                 editor.apply();
 
+
                 valorDizimoPendente.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(dizimoPendente)));
                 valorSalarioRestante.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(salarioRestante)));
 
-                edtTxtValorDaMovimentacao.setText("");
-
                 MovimentacaoFinanceira movimentacaoFinanceira = new MovimentacaoFinanceira();
+                movimentacaoFinanceira.setID(UUID.randomUUID().toString());
                 movimentacaoFinanceira.setTipo(spnTiposDeMovimentacao.getSelectedItem().toString());
                 movimentacaoFinanceira.setValor(edtTxtValorDaMovimentacao.getText().toString());
                 movimentacaoFinanceira.setDescricao(editDescricao.getText().toString());
                 movimentacaoFinanceira.setData(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date()));
 
-                FirebaseFirestore db = FirebaseFirestore.getInstance();
-                db.collection(MOVIMENTACOES_FINANCEIRAS).add(movimentacaoFinanceira)
-                        .addOnSuccessListener(documentReference -> {
-                            movimentacaoFinanceira.setID(documentReference.getId());
+                db.collection(MOVIMENTACOES_FINANCEIRAS).document(movimentacaoFinanceira.getID()).set(movimentacaoFinanceira)
+                        .addOnSuccessListener(unused -> {
                             Toast.makeText(v.getContext(), "Adicionado com sucesso", Toast.LENGTH_SHORT).show();
                         })
                         .addOnFailureListener(e -> Toast.makeText(v.getContext(), "Falha. tente novamente", Toast.LENGTH_SHORT).show());
+
+                Map<String, Object> novoSalarioRestante = new HashMap<>();
+                novoSalarioRestante.put("valor", salarioRestante);
+                db.collection(INFORMACOES_PRINCIPAIS).document(SALARIO_RESTANTE).set(novoSalarioRestante);
+
+                Map<String, Object> novoDizimoPendente = new HashMap<>();
+                novoDizimoPendente.put("valor", dizimoPendente);
+                db.collection(INFORMACOES_PRINCIPAIS).document(DIZIMO_PENDENTE).set(novoDizimoPendente);
+
+                edtTxtValorDaMovimentacao.setText("");
             }
+
         });
         botaoHistoricoDeMovimentacoes = findViewById(R.id.botao_historico);
         botaoHistoricoDeMovimentacoes.setOnClickListener(v -> startActivity(new Intent(this, HistoricoDeMovimentacoesActivity.class)));

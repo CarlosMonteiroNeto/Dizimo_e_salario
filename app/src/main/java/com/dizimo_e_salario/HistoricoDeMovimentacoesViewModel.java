@@ -8,6 +8,10 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -28,6 +32,9 @@ public class HistoricoDeMovimentacoesViewModel extends AndroidViewModel {
     public MutableLiveData<List<MovimentacaoFinanceira>> getMovimentacoes(){
         return movimentacoes;
     }
+    public void setMovimentacoes (List<MovimentacaoFinanceira> movimentacaoFinanceira){
+        movimentacoes.setValue(movimentacaoFinanceira);
+    }
     public MutableLiveData<List<MovimentacaoFinanceira>> carregarMovimentacoes(){
         MutableLiveData<List<MovimentacaoFinanceira>> movims = new MutableLiveData<>();
         db.collection(MainActivity.MOVIMENTACOES_FINANCEIRAS).get()
@@ -44,4 +51,13 @@ public class HistoricoDeMovimentacoesViewModel extends AndroidViewModel {
                 });
         return movims;
     }
+//    public void excluirMovimentacao(MovimentacaoFinanceira movimentacaoFinanceira){
+//        List<MovimentacaoFinanceira> movimentacoesAtuais = new ArrayList<>();
+//        db.collection(MainActivity.MOVIMENTACOES_FINANCEIRAS)
+//                .document(movimentacaoFinanceira.getID()).delete()
+//                .addOnSuccessListener(unused -> {
+//                    movimentacoesAtuais.remove(movimentacaoFinanceira);
+//                    movimentacoes.setValue(movimentacoesAtuais);
+//                });
+//    }
 }
