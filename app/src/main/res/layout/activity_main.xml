@@ -161,4 +161,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/valor_movimentado" />
 
+    <Button
+        android:id="@+id/btn_valores_a_receber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Valores a receber"
+        app:layout_constraintBottom_toTopOf="@+id/titulo_historico"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/botao_registrar" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

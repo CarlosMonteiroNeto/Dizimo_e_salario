@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     EditText edtTxtValorDaMovimentacao;
     //descricaoDaMovimentacao;
     Spinner spnTiposDeMovimentacao;
-    Button botaoRegistrar;
+    Button botaoRegistrar, botaoValoresAReceber;
     ImageButton botaoHistoricoDeMovimentacoes;
 
     public static final String MOVIMENTACOES_FINANCEIRAS = "Movimentações financeiras";
@@ -117,6 +117,8 @@ public class MainActivity extends AppCompatActivity {
         tituloDescricao = findViewById(R.id.titulo_descricao);
         editDescricao = findViewById(R.id.edit_descricao);
         botaoRegistrar = findViewById(R.id.botao_registrar);
+        botaoValoresAReceber = findViewById(R.id.btn_valores_a_receber);
+        botaoValoresAReceber.setOnClickListener(v -> Toast.makeText(MainActivity.this, "Em breve", Toast.LENGTH_SHORT).show());
 
         botaoRegistrar.setOnClickListener(v -> {
             if (edtTxtValorDaMovimentacao.getText().toString().trim().isEmpty()
