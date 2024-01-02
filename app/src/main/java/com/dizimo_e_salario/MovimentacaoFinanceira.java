@@ -8,7 +8,7 @@ public class MovimentacaoFinanceira {
     private String tipo;
     private String valor;
     private String descricao;
-    private String data;
+    private long data;
     public String getTipo() {
         return tipo;
     }
@@ -24,7 +24,7 @@ public class MovimentacaoFinanceira {
     public String getDescricao() {
         return descricao;
     }
-    public String getData() {
+    public long getData() {
         return data;
     }
     public void setTipo(String tipo) {
@@ -36,7 +36,7 @@ public class MovimentacaoFinanceira {
     public void setDescricao(String descricao) {
         this.descricao = descricao;
     }
-    public void setData(String data) {
+    public void setData(long data) {
         this.data = data;
     }
 }

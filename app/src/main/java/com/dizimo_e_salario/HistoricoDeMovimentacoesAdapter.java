@@ -17,21 +17,25 @@ import com.dizimo_e_salario.canarinho.formatador.FormatadorValor;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class HistoricoDeMovimentacoesAdapter extends RecyclerView.Adapter<HistoricoDeMovimentacoesAdapter.HistoricoDeMovimentacoesViewHolder> {
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    FirebaseFirestore db;
     private List<MovimentacaoFinanceira> movimentacoes;
     public boolean botaoModoIniciarEdicao = true;
-    private final SharedPreferences sharedPreferences;
     HistoricoDeMovimentacoesViewModel viewModel;
 
-    public HistoricoDeMovimentacoesAdapter(List<MovimentacaoFinanceira> movimentacoes, SharedPreferences preferences, HistoricoDeMovimentacoesViewModel viewModel){
-        this.movimentacoes = movimentacoes;
-        this.sharedPreferences = preferences;
+    public HistoricoDeMovimentacoesAdapter(List<MovimentacaoFinanceira> movimentacoes, FirebaseFirestore db, HistoricoDeMovimentacoesViewModel viewModel){
+        this.movimentacoes = ordenarPorData(movimentacoes);
+        this.db = db;
         this.viewModel = viewModel;
     }
 
@@ -48,11 +52,12 @@ public class HistoricoDeMovimentacoesAdapter extends RecyclerView.Adapter<Histor
         String tipo = movimentacaoFinanceira.getTipo();
         String valor = movimentacaoFinanceira.getValor();
         String descricao = movimentacaoFinanceira.getDescricao();
-        String data = movimentacaoFinanceira.getData();
+        long data = movimentacaoFinanceira.getData();
         holder.tipo.setText(tipo);
         holder.valor.setText(valor);
         holder.descricao.setText(descricao);
-        holder.data.setText(data);
+        holder.data.setText(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date(data)));
+
 
 //        holder.btnEditar.setOnClickListener(view -> {
 //            if (botaoModoIniciarEdicao){
@@ -84,14 +89,14 @@ public class HistoricoDeMovimentacoesAdapter extends RecyclerView.Adapter<Histor
             dialogBuilder.setTitle("Atenção!");
             dialogBuilder.setMessage("Deseja excluir esta movimentação financeira?");
             dialogBuilder.setPositiveButton("Sim", (dialog, which) -> {
-                List<MovimentacaoFinanceira> movimentacoesAtuais = new ArrayList<>();
+                List<MovimentacaoFinanceira> movimentacoesAtuais = viewModel.getMovimentacoes().getValue();
                 DocumentReference docRef = db.collection(MainActivity.MOVIMENTACOES_FINANCEIRAS)
                         .document(movimentacaoFinanceira.getID());
                 docRef.delete()
                         .addOnSuccessListener(unused -> {
                             movimentacoesAtuais.remove(movimentacaoFinanceira);
                             viewModel.setMovimentacoes(movimentacoesAtuais);
-                            atualizarSharedPreferencesCasoExclua(tipo, valor);
+                            viewModel.atualizarSalarioEDizimo(-Float.parseFloat(MainActivity.removerMascara(valor)), tipo);
                             Toast.makeText(view.getContext(), "Excluído com sucesso", Toast.LENGTH_SHORT).show();
                         })
                         .addOnFailureListener(e -> Toast.makeText(view.getContext(), "Falha na exclusão. tente novamente", Toast.LENGTH_SHORT).show());
@@ -107,7 +112,7 @@ public class HistoricoDeMovimentacoesAdapter extends RecyclerView.Adapter<Histor
         return movimentacoes != null ? movimentacoes.size() : 0;
     }
     public void atualizarItens (List < MovimentacaoFinanceira > movimentacoes) {
-        this.movimentacoes = movimentacoes;
+        this.movimentacoes = ordenarPorData(movimentacoes);
         notifyDataSetChanged();
     }
 
@@ -135,35 +140,9 @@ public class HistoricoDeMovimentacoesAdapter extends RecyclerView.Adapter<Histor
         edittext.setClickable(true);
         edittext.setCursorVisible(true);
     }
-    private void atualizarSharedPreferencesCasoExclua(String tipo, String valor){
-
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        float dizimoPendente = sharedPreferences.getFloat(MainActivity.CHAVE_DIZIMO, MainActivity.DIZIMO_PENDENTE_PADRAO);
-        float salarioRestante = sharedPreferences.getFloat(MainActivity.CHAVE_SALARIO, MainActivity.SALARIO_RESTANTE_PADRAO);
-        float valorMovimentado = Float.parseFloat(FormatadorValor.VALOR_COM_SIMBOLO.desformata(valor));
-//                float saldo = sharedPreferences.getFloat(CHAVE_SALDO, SALDO_PADRAO);
-
-        if (tipo.equals("Saída")) {
-//                    saldo = saldo - (Float.parseFloat(valorDaMovimentacao.getText().toString())/100);
-            dizimoPendente = (dizimoPendente + (valorMovimentado * (float) 0.1));
-            salarioRestante = (salarioRestante + (valorMovimentado * (float) 0.72));
-
-        } else if (tipo.equals("Entrada")) {
-//                    saldo = saldo + (Float.parseFloat(valorDaMovimentacao.getText().toString())/100);
-            dizimoPendente = (dizimoPendente - (valorMovimentado * (float) 0.1));
-            salarioRestante = (salarioRestante - (valorMovimentado * (float) 0.72));
-
-        } else if (tipo.equals("Dar dízimo")) {
-//                    saldo = saldo - (Float.parseFloat(valorDaMovimentacao.getText().toString())/100);
-            dizimoPendente = dizimoPendente + valorMovimentado;
-
-        } else if (tipo.equals("Gasto pessoal")) {
-//                    saldo = saldo - (Float.parseFloat(valorDaMovimentacao.getText().toString())/100);
-            salarioRestante = salarioRestante + valorMovimentado;
-        }
-//                editor.putFloat(CHAVE_SALDO, saldo);
-        editor.putFloat(MainActivity.CHAVE_DIZIMO, dizimoPendente);
-        editor.putFloat(MainActivity.CHAVE_SALARIO, salarioRestante);
-        editor.apply();
+    public List<MovimentacaoFinanceira> ordenarPorData(List<MovimentacaoFinanceira> listaDesordenada) {
+        Comparator<MovimentacaoFinanceira> comparador = Comparator.comparingLong(MovimentacaoFinanceira::getData);
+        Collections.sort(listaDesordenada, comparador);
+        return listaDesordenada;
     }
 }
