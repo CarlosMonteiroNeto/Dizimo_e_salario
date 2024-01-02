@@ -87,15 +87,15 @@ public class MainActivity extends AppCompatActivity {
         tituloTipoDaMovimentacao = findViewById(R.id.titulo_tipo_de_movimentacao);
         tituloDizimo = findViewById(R.id.titulo_dizimo);
         valorDizimoPendente = findViewById(R.id.dizimo_pendente);
-        valorDizimoPendente.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(dizimoPendente)));
+//        valorDizimoPendente.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(dizimoPendente)));
 //        valorDizimoPendente.addTextChangedListener(new ValorMonetarioWatcher.Builder().comSimboloReal().comMantemZerosAoLimpar().build());
         tituloSalario = findViewById(R.id.titulo_salario);
         valorSalarioRestante = findViewById(R.id.salario_restante);
-        valorSalarioRestante.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(salarioRestante)));
+//        valorSalarioRestante.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(salarioRestante)));
         viewModel.getDizimoPendente().observe(this, dizimo ->
-                valorDizimoPendente.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(dizimoPendente))));
+                valorDizimoPendente.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(dizimo/100))));
         viewModel.getSalarioRestante().observe(this, salario ->
-                valorSalarioRestante.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(salarioRestante))));
+                valorSalarioRestante.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(salario/100))));
 //        valorSalarioRestante.addTextChangedListener(new ValorMonetarioWatcher.Builder().comSimboloReal().comMantemZerosAoLimpar().build());
         edtTxtValorDaMovimentacao = findViewById(R.id.valor_movimentado);
         edtTxtValorDaMovimentacao.addTextChangedListener(new ValorMonetarioWatcher.Builder()

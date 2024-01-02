@@ -73,7 +73,7 @@ public class HistoricoDeMovimentacoesViewModel extends AndroidViewModel {
     }
     private void carregarInformacoesPrincipais (){
 
-        financeRef.get().addOnSuccessListener(documentSnapshot -> {
+        db.collection(MainActivity.INFORMACOES_PRINCIPAIS).document(MainActivity.INFORMACOES_PRINCIPAIS).get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
                 // Recupera os valores atuais
                 this.salarioRestante.setValue(documentSnapshot.getDouble(SALARIO_RESTANTE).floatValue());
