@@ -1,6 +1,7 @@
 package com.dizimo_e_salario;
 
 import android.app.AlertDialog;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,6 +19,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -58,6 +61,7 @@ public class ValoresAReceberAdapter extends RecyclerView.Adapter<ValoresAReceber
         holder.valor.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(valor/100)));
         holder.descricao.setText(descricao);
         holder.data.setText(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date(data)));
+        marcarDatasVencidas(data, holder);
 
 
 //        holder.btnEditar.setOnClickListener(view -> {
@@ -123,5 +127,18 @@ public class ValoresAReceberAdapter extends RecyclerView.Adapter<ValoresAReceber
         Comparator<ValorAReceber> comparador = Comparator.comparingLong(ValorAReceber::getData);
         Collections.sort(listaDesordenada, comparador);
         return listaDesordenada;
+    }
+
+    private void marcarDatasVencidas(long dataDePagar, ValoresAReceberViewHolder holder){
+
+        Calendar hoje = Calendar.getInstance();
+        hoje.add(Calendar.HOUR_OF_DAY, 24);
+        long milissegundos24HorasDepois = hoje.getTimeInMillis();
+
+        if (dataDePagar > milissegundos24HorasDepois) {
+            holder.itemView.setBackgroundColor(Color.GRAY);
+        } else {
+            holder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
     }
 }

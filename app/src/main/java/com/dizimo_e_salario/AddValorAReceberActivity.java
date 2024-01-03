@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.dizimo_e_salario.canarinho.watcher.ValorMonetarioWatcher;
 import com.vicmikhailau.maskededittext.MaskedEditText;
 
 import java.text.ParseException;
@@ -36,6 +37,11 @@ public class AddValorAReceberActivity extends AppCompatActivity {
         edtDescricaoDaDivida = findViewById(R.id.edit_descricao_da_divida);
         maskedEdtDataDePagamento = findViewById(R.id.edit_data_de_pagamento);
         maskedEdtDataDePagamento.setText("");
+
+        edtValorDevido.addTextChangedListener(new ValorMonetarioWatcher.Builder()
+                .comSimboloReal()
+                .comMantemZerosAoLimpar()
+                .build());
 
         btnRegistrarValorAReceber = findViewById(R.id.botao_registrar_valor_a_receber);
 
