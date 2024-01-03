@@ -46,6 +46,7 @@ public class HistoricoDeMovimentacoesAdapter extends RecyclerView.Adapter<Histor
     @Override
     public void onBindViewHolder(@NonNull HistoricoDeMovimentacoesViewHolder holder, int position) {
         MovimentacaoFinanceira movimentacaoFinanceira = movimentacoes.get(position);
+        String id = movimentacaoFinanceira.getID();
         String tipo = movimentacaoFinanceira.getTipo();
         String valor = movimentacaoFinanceira.getValor();
         String descricao = movimentacaoFinanceira.getDescricao();
@@ -88,7 +89,7 @@ public class HistoricoDeMovimentacoesAdapter extends RecyclerView.Adapter<Histor
             dialogBuilder.setPositiveButton("Sim", (dialog, which) -> {
                 List<MovimentacaoFinanceira> movimentacoesAtuais = viewModel.getMovimentacoes().getValue();
                 DocumentReference docRef = db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado)
-                        .collection(MainActivity.MOVIMENTACOES_FINANCEIRAS).document(movimentacaoFinanceira.getID());
+                        .collection(MainActivity.MOVIMENTACOES_FINANCEIRAS).document(id);
                 docRef.delete()
                         .addOnSuccessListener(unused -> {
                             movimentacoesAtuais.remove(movimentacaoFinanceira);
@@ -119,7 +120,7 @@ public class HistoricoDeMovimentacoesAdapter extends RecyclerView.Adapter<Histor
         public HistoricoDeMovimentacoesViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            tipo =itemView.findViewById(R.id.tipo);
+            tipo =itemView.findViewById(R.id.nome);
             valor = itemView.findViewById(R.id.valor);
             descricao = itemView.findViewById(R.id.descricao);
             data = itemView.findViewById(R.id.data);

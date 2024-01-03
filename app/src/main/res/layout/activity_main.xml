@@ -73,14 +73,14 @@
         android:layout_margin="5sp"
         android:scrollbarSize="20sp"
         android:textColor="@color/black"
-        app:layout_constraintBottom_toTopOf="@+id/titulo_valor"
+        app:layout_constraintBottom_toTopOf="@+id/titulo_valor_movimentado"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/titulo_tipo_de_movimentacao" />
 
     <TextView
-        android:id="@+id/titulo_valor"
+        android:id="@+id/titulo_valor_movimentado"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="5sp"
@@ -102,10 +102,10 @@
         android:textSize="25sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/titulo_valor" />
+        app:layout_constraintTop_toBottomOf="@id/titulo_valor_movimentado" />
 
     <Button
-        android:id="@+id/botao_registrar"
+        android:id="@+id/botao_registrar_valor_movimentado"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="5sp"
@@ -113,7 +113,7 @@
         android:text="Registrar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edit_descricao" />
+        app:layout_constraintTop_toBottomOf="@+id/edit_descricao_da_movimentacao" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -137,7 +137,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
-        android:id="@+id/edit_descricao"
+        android:id="@+id/edit_descricao_da_movimentacao"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -147,10 +147,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/titulo_descricao" />
+        app:layout_constraintTop_toBottomOf="@+id/titulo_descricao_da_movimentacao" />
 
     <TextView
-        android:id="@+id/titulo_descricao"
+        android:id="@+id/titulo_descricao_da_movimentacao"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -169,7 +169,7 @@
         app:layout_constraintBottom_toTopOf="@+id/titulo_historico"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/botao_registrar" />
+        app:layout_constraintTop_toBottomOf="@+id/botao_registrar_valor_movimentado" />
 
     <Button
         android:id="@+id/btn_sair"

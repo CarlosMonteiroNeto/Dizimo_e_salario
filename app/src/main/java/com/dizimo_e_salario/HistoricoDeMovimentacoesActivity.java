@@ -34,6 +34,7 @@ public class HistoricoDeMovimentacoesActivity extends AppCompatActivity {
         //É obrigatório chamar carregarViewModel após o construtor para inicializá-lo corretamente
         viewModel = ((MinhaAplicacao) getApplication()).getViewModel();
         viewModel.carregarViewModel(usuarioLogado);
+        viewModel.carregarMovimentacoes();
 
         movimentacoesRecycler = findViewById(R.id.recyclerview_movimentacoes);
         adapter = new HistoricoDeMovimentacoesAdapter(new ArrayList<>(), db, viewModel, usuarioLogado);

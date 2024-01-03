@@ -1,6 +1,5 @@
 package com.dizimo_e_salario;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Context;
 import android.content.Intent;
@@ -39,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private String usuarioLogado;
 
     public static final String MOVIMENTACOES_FINANCEIRAS = "Movimentações financeiras";
+    public static final String VALORES_A_RECEBER = "Valores a receber";
     public static final String INFORMACOES_PRINCIPAIS = "Informações principais";
 
     FirebaseFirestore db;
@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         //É obrigatório chamar carregarViewModel após o construtor para inicializá-lo corretamente
         viewModel = ((MinhaAplicacao) getApplication()).getViewModel();
         viewModel.carregarViewModel(usuarioLogado);
+        viewModel.carregarMovimentacoes();
         db = FirebaseFirestore.getInstance();
 
 //        SharedPreferences sharedPreferences = getSharedPreferences("saldos", Context.MODE_PRIVATE);
@@ -76,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
 //            editor.putFloat(CHAVE_SALARIO, SALARIO_RESTANTE_PADRAO);
 //            editor.apply();
 //        }
-        tituloValorDaMovimentacao = findViewById(R.id.titulo_valor);
+        tituloValorDaMovimentacao = findViewById(R.id.titulo_valor_movimentado);
         tituloTipoDaMovimentacao = findViewById(R.id.titulo_tipo_de_movimentacao);
         tituloDizimo = findViewById(R.id.titulo_dizimo);
         valorDizimoPendente = findViewById(R.id.dizimo_pendente);
@@ -103,11 +104,11 @@ public class MainActivity extends AppCompatActivity {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.tipos_de_movimentacao, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spnTiposDeMovimentacao.setAdapter(adapter);
-        tituloDescricao = findViewById(R.id.titulo_descricao);
-        editDescricao = findViewById(R.id.edit_descricao);
-        botaoRegistrar = findViewById(R.id.botao_registrar);
+        tituloDescricao = findViewById(R.id.titulo_descricao_da_movimentacao);
+        editDescricao = findViewById(R.id.edit_descricao_da_movimentacao);
+        botaoRegistrar = findViewById(R.id.botao_registrar_valor_movimentado);
         botaoValoresAReceber = findViewById(R.id.btn_valores_a_receber);
-        botaoValoresAReceber.setOnClickListener(v -> Toast.makeText(MainActivity.this, "Em breve", Toast.LENGTH_SHORT).show());
+        botaoValoresAReceber.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, ValoresAReceberActivity.class)));
 
         botaoRegistrar.setOnClickListener(v -> {
             if (edtTxtValorDaMovimentacao.getText().toString().trim().isEmpty()

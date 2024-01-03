@@ -1,6 +1,8 @@
 package com.dizimo_e_salario;
 
-public class MovimentacaoFinanceira {
+import java.io.Serializable;
+
+public class MovimentacaoFinanceira implements Serializable {
 
     public MovimentacaoFinanceira(){}
 

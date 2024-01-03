@@ -7,14 +7,14 @@
     android:padding="8dp">
 
     <TextView
-        android:id="@+id/nome"
+        android:id="@+id/nome_do_devedor"
         android:layout_width="140dp"
         android:layout_height="wrap_content"
         android:textSize="18sp"
         android:textColor="@color/black" />
 
     <TextView
-        android:id="@+id/valor"
+        android:id="@+id/valor_a_receber"
         android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:textSize="18sp"
@@ -23,7 +23,7 @@
         android:layout_marginEnd="8dp"/>
 
     <TextView
-        android:id="@+id/descricao"
+        android:id="@+id/descricao_para_receber"
         android:layout_width="280dp"
         android:layout_height="wrap_content"
         android:textSize="18sp"
@@ -31,7 +31,7 @@
         />
 
     <TextView
-        android:id="@+id/data"
+        android:id="@+id/data_para_receber"
         android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -39,7 +39,7 @@
         android:textSize="18sp" />
 
     <ImageButton
-        android:id="@+id/botao_editar"
+        android:id="@+id/botao_editar_valor_a_receber"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginStart="6dp"
@@ -51,7 +51,7 @@
         android:layout_height="30dp"
         android:layout_marginStart="6dp"
         android:layout_marginEnd="6dp"
-        android:id="@+id/botao_excluir"
+        android:id="@+id/botao_excluir_valor_a_receber"
         android:background="@android:drawable/ic_menu_delete"/>
 
 </LinearLayout>
