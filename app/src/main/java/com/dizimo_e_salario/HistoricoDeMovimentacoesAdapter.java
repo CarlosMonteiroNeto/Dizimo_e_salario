@@ -1,7 +1,6 @@
 package com.dizimo_e_salario;
 
 import android.app.AlertDialog;
-import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,30 +12,28 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.dizimo_e_salario.canarinho.formatador.FormatadorValor;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 public class HistoricoDeMovimentacoesAdapter extends RecyclerView.Adapter<HistoricoDeMovimentacoesAdapter.HistoricoDeMovimentacoesViewHolder> {
     FirebaseFirestore db;
     private List<MovimentacaoFinanceira> movimentacoes;
     public boolean botaoModoIniciarEdicao = true;
-    HistoricoDeMovimentacoesViewModel viewModel;
+    SharedViewModel viewModel;
+    String usuarioLogado;
 
-    public HistoricoDeMovimentacoesAdapter(List<MovimentacaoFinanceira> movimentacoes, FirebaseFirestore db, HistoricoDeMovimentacoesViewModel viewModel){
+    public HistoricoDeMovimentacoesAdapter(List<MovimentacaoFinanceira> movimentacoes, FirebaseFirestore db, SharedViewModel viewModel, String usuarioLogado){
         this.movimentacoes = ordenarPorData(movimentacoes);
         this.db = db;
         this.viewModel = viewModel;
+        this.usuarioLogado = usuarioLogado;
     }
 
     @NonNull
@@ -90,8 +87,8 @@ public class HistoricoDeMovimentacoesAdapter extends RecyclerView.Adapter<Histor
             dialogBuilder.setMessage("Deseja excluir esta movimentação financeira?");
             dialogBuilder.setPositiveButton("Sim", (dialog, which) -> {
                 List<MovimentacaoFinanceira> movimentacoesAtuais = viewModel.getMovimentacoes().getValue();
-                DocumentReference docRef = db.collection(MainActivity.MOVIMENTACOES_FINANCEIRAS)
-                        .document(movimentacaoFinanceira.getID());
+                DocumentReference docRef = db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado)
+                        .collection(MainActivity.MOVIMENTACOES_FINANCEIRAS).document(movimentacaoFinanceira.getID());
                 docRef.delete()
                         .addOnSuccessListener(unused -> {
                             movimentacoesAtuais.remove(movimentacaoFinanceira);
@@ -141,7 +138,7 @@ public class HistoricoDeMovimentacoesAdapter extends RecyclerView.Adapter<Histor
         edittext.setCursorVisible(true);
     }
     public List<MovimentacaoFinanceira> ordenarPorData(List<MovimentacaoFinanceira> listaDesordenada) {
-        Comparator<MovimentacaoFinanceira> comparador = Comparator.comparingLong(MovimentacaoFinanceira::getData);
+        Comparator<MovimentacaoFinanceira> comparador = Comparator.comparingLong(MovimentacaoFinanceira::getData).reversed();
         Collections.sort(listaDesordenada, comparador);
         return listaDesordenada;
     }

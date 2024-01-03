@@ -1,5 +1,4 @@
 package com.dizimo_e_salario;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -7,10 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,21 +17,9 @@ import android.widget.Toast;
 
 import com.dizimo_e_salario.canarinho.formatador.FormatadorValor;
 import com.dizimo_e_salario.canarinho.watcher.ValorMonetarioWatcher;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.vicmikhailau.maskededittext.MaskedEditText;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -50,8 +34,9 @@ public class MainActivity extends AppCompatActivity {
     EditText edtTxtValorDaMovimentacao;
     //descricaoDaMovimentacao;
     Spinner spnTiposDeMovimentacao;
-    Button botaoRegistrar, botaoValoresAReceber;
+    Button botaoRegistrar, botaoValoresAReceber, botaoSair;
     ImageButton botaoHistoricoDeMovimentacoes;
+    private String usuarioLogado;
 
     public static final String MOVIMENTACOES_FINANCEIRAS = "Movimentações financeiras";
     public static final String INFORMACOES_PRINCIPAIS = "Informações principais";
@@ -59,14 +44,22 @@ public class MainActivity extends AppCompatActivity {
     FirebaseFirestore db;
     Float salarioRestante;
     Float dizimoPendente;
-    HistoricoDeMovimentacoesViewModel viewModel;
+    SharedViewModel viewModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        SharedPreferences sharedPreferences = getSharedPreferences(LoginActivity.DADOS_DE_LOGIN, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        usuarioLogado = sharedPreferences.getString(LoginActivity.CHAVE_USUARIO, LoginActivity.USUARIO_PADRAO);
+
         salarioRestante = 0.00f;
         dizimoPendente = 0.00f;
-        viewModel = new ViewModelProvider(this).get(HistoricoDeMovimentacoesViewModel.class);
+        //É obrigatório chamar carregarViewModel após o construtor para inicializá-lo corretamente
+        viewModel = ((MinhaAplicacao) getApplication()).getViewModel();
+        viewModel.carregarViewModel(usuarioLogado);
         db = FirebaseFirestore.getInstance();
 
 //        SharedPreferences sharedPreferences = getSharedPreferences("saldos", Context.MODE_PRIVATE);
@@ -92,10 +85,6 @@ public class MainActivity extends AppCompatActivity {
         tituloSalario = findViewById(R.id.titulo_salario);
         valorSalarioRestante = findViewById(R.id.salario_restante);
 //        valorSalarioRestante.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(salarioRestante)));
-        viewModel.getDizimoPendente().observe(this, dizimo ->
-                valorDizimoPendente.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(dizimo/100))));
-        viewModel.getSalarioRestante().observe(this, salario ->
-                valorSalarioRestante.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(salario/100))));
 //        valorSalarioRestante.addTextChangedListener(new ValorMonetarioWatcher.Builder().comSimboloReal().comMantemZerosAoLimpar().build());
         edtTxtValorDaMovimentacao = findViewById(R.id.valor_movimentado);
         edtTxtValorDaMovimentacao.addTextChangedListener(new ValorMonetarioWatcher.Builder()
@@ -145,7 +134,9 @@ public class MainActivity extends AppCompatActivity {
                 movimentacaoFinanceira.setDescricao(editDescricao.getText().toString());
                 movimentacaoFinanceira.setData(new Date().getTime());
 
-                db.collection(MOVIMENTACOES_FINANCEIRAS).add(movimentacaoFinanceira).addOnSuccessListener(documentReference -> {
+                db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado)
+                        .collection(MOVIMENTACOES_FINANCEIRAS).add(movimentacaoFinanceira)
+                        .addOnSuccessListener(documentReference -> {
                     viewModel.atualizarSalarioEDizimo(valorMovimentado, tipoDeMovimentacao);
                     edtTxtValorDaMovimentacao.setText("");
                     Toast.makeText(v.getContext(), "Adicionado com sucesso", Toast.LENGTH_SHORT).show();
@@ -155,7 +146,29 @@ public class MainActivity extends AppCompatActivity {
         });
         botaoHistoricoDeMovimentacoes = findViewById(R.id.botao_historico);
         botaoHistoricoDeMovimentacoes.setOnClickListener(v -> startActivity(new Intent(this, HistoricoDeMovimentacoesActivity.class)));
+
+        botaoSair = findViewById(R.id.btn_sair);
+        botaoSair.setOnClickListener(v -> {
+            editor.putBoolean(LoginActivity.CHAVE_LOGIN_AUTOMATICO, false);
+            editor.putString(LoginActivity.CHAVE_USUARIO, LoginActivity.USUARIO_PADRAO);
+            editor.apply();
+
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        });
+
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        viewModel.getDizimoPendente().observe(this, dizimo ->
+                valorDizimoPendente.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(dizimo/100))));
+        viewModel.getSalarioRestante().observe(this, salario ->
+                valorSalarioRestante.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(salario/100))));
+    }
+
     public static String removerMascara(String textoComMascara) {
         return textoComMascara.replaceAll("[^0-9]", "");
     }

@@ -1,7 +1,6 @@
 package com.dizimo_e_salario;
 
 import android.app.Application;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -9,12 +8,7 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
 
-import com.dizimo_e_salario.canarinho.formatador.FormatadorValor;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -22,22 +16,20 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HistoricoDeMovimentacoesViewModel extends AndroidViewModel {
+public class SharedViewModel extends AndroidViewModel {
 
     private final FirebaseFirestore db;
-    private final MutableLiveData<List<MovimentacaoFinanceira>> movimentacoes;
+    private MutableLiveData<List<MovimentacaoFinanceira>> movimentacoes;
     public static final String SALARIO_RESTANTE = "Salário restante";
     public static final String DIZIMO_PENDENTE = "Dízimo pendente";
     private final MutableLiveData<Float>salarioRestante = new MutableLiveData<>();
     private final MutableLiveData<Float>dizimoPendente = new MutableLiveData<>();
     DocumentReference financeRef;
+    private String usuarioLogado = "";
 
-    public HistoricoDeMovimentacoesViewModel(@NonNull Application application) {
+    public SharedViewModel(@NonNull Application application) {
         super(application);
         db = FirebaseFirestore.getInstance();
-        movimentacoes = carregarMovimentacoes();
-        financeRef = db.collection(MainActivity.INFORMACOES_PRINCIPAIS).document(MainActivity.INFORMACOES_PRINCIPAIS);
-        carregarInformacoesPrincipais();
     }
     public MutableLiveData<List<MovimentacaoFinanceira>> getMovimentacoes(){
         return movimentacoes;
@@ -56,7 +48,8 @@ public class HistoricoDeMovimentacoesViewModel extends AndroidViewModel {
     }
     public MutableLiveData<List<MovimentacaoFinanceira>> carregarMovimentacoes(){
         MutableLiveData<List<MovimentacaoFinanceira>> movims = new MutableLiveData<>();
-        db.collection(MainActivity.MOVIMENTACOES_FINANCEIRAS).get()
+        db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado)
+                .collection(MainActivity.MOVIMENTACOES_FINANCEIRAS).get()
                 .addOnCompleteListener(task -> {
                     if(task.isSuccessful()){
                         List<MovimentacaoFinanceira> movs = new ArrayList<>();
@@ -73,7 +66,7 @@ public class HistoricoDeMovimentacoesViewModel extends AndroidViewModel {
     }
     private void carregarInformacoesPrincipais (){
 
-        db.collection(MainActivity.INFORMACOES_PRINCIPAIS).document(MainActivity.INFORMACOES_PRINCIPAIS).get().addOnSuccessListener(documentSnapshot -> {
+        financeRef.get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
                 // Recupera os valores atuais
                 this.salarioRestante.setValue(documentSnapshot.getDouble(SALARIO_RESTANTE).floatValue());
@@ -122,6 +115,13 @@ public class HistoricoDeMovimentacoesViewModel extends AndroidViewModel {
         }
         salarioRestante.setValue(salarioAtual);
         dizimoPendente.setValue(dizimoAtual);
+    }
+
+    public void carregarViewModel(String usuarioLogado){
+        this.usuarioLogado = usuarioLogado;
+        movimentacoes = carregarMovimentacoes();
+        financeRef = db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado);
+        carregarInformacoesPrincipais();
     }
 //    public void excluirMovimentacao(MovimentacaoFinanceira movimentacaoFinanceira){
 //        List<MovimentacaoFinanceira> movimentacoesAtuais = new ArrayList<>();

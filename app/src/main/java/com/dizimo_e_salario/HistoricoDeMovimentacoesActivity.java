@@ -18,21 +18,33 @@ public class HistoricoDeMovimentacoesActivity extends AppCompatActivity {
     RecyclerView movimentacoesRecycler;
     HistoricoDeMovimentacoesAdapter adapter;
 
-    HistoricoDeMovimentacoesViewModel viewModel;
+    SharedViewModel viewModel;
+    String usuarioLogado;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_historico_de_movimentacoes);
+
+        SharedPreferences preferences = getSharedPreferences(LoginActivity.DADOS_DE_LOGIN, Context.MODE_PRIVATE);
+        usuarioLogado = preferences.getString(LoginActivity.CHAVE_USUARIO, LoginActivity.USUARIO_PADRAO);
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        viewModel = new ViewModelProvider(this).get(HistoricoDeMovimentacoesViewModel.class);
+        //É obrigatório chamar carregarViewModel após o construtor para inicializá-lo corretamente
+        viewModel = ((MinhaAplicacao) getApplication()).getViewModel();
+        viewModel.carregarViewModel(usuarioLogado);
 
         movimentacoesRecycler = findViewById(R.id.recyclerview_movimentacoes);
-        adapter = new HistoricoDeMovimentacoesAdapter(new ArrayList<>(), db, viewModel);
+        adapter = new HistoricoDeMovimentacoesAdapter(new ArrayList<>(), db, viewModel, usuarioLogado);
         movimentacoesRecycler.setLayoutManager(new LinearLayoutManager(this));
         movimentacoesRecycler.setAdapter(adapter);
         movimentacoesRecycler.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         viewModel.getMovimentacoes().observe(HistoricoDeMovimentacoesActivity.this, movimentacoes -> adapter.atualizarItens(movimentacoes));
     }
 }

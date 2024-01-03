@@ -7,4 +7,15 @@
         <item>Dar dízimo</item>
         <item>Gasto pessoal</item>
     </string-array>
+
+    <string-array name="usuarios">
+        <item>Leni</item>
+        <item>Deisi</item>
+    </string-array>
+
+    <string-array name="senhas">
+        <item>2943</item>
+        <item>4621</item>
+    </string-array>
+
 </resources>
