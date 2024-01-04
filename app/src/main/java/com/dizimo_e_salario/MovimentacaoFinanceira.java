@@ -6,7 +6,7 @@ public class MovimentacaoFinanceira implements Serializable {
 
     public MovimentacaoFinanceira(){}
 
-    private String ID;
+    private String iD;
     private String tipo;
     private String valor;
     private String descricao;
@@ -15,10 +15,10 @@ public class MovimentacaoFinanceira implements Serializable {
         return tipo;
     }
     public String getID() {
-        return ID;
+        return iD;
     }
-    public void setID(String ID) {
-        this.ID = ID;
+    public void setID(String iD) {
+        this.iD = iD;
     }
     public String getValor() {
         return valor;

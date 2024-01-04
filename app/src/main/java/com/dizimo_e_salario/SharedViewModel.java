@@ -40,6 +40,8 @@ public class SharedViewModel extends AndroidViewModel {
         db = FirebaseFirestore.getInstance();
     }
     public void carregarViewModel(String usuarioLogado){
+        isLoading.setValue(true);
+        movimentacoes.setValue(new ArrayList<>());
         this.usuarioLogado = usuarioLogado;
         financeRef = db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado);
         financeRef.get().addOnSuccessListener(documentSnapshot -> {
@@ -51,10 +53,12 @@ public class SharedViewModel extends AndroidViewModel {
                 this.salarioRestante.setValue(0.00f);
                 this.dizimoPendente.setValue(0.00f);
             }
-        });
+        }
+        );
+        isLoading.setValue(false);
     }
     public void carregarMovimentacoes(){
-
+        isLoading.setValue(true);
         db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado)
                 .collection(MainActivity.MOVIMENTACOES_FINANCEIRAS).get()
                 .addOnCompleteListener(task -> {
@@ -69,8 +73,10 @@ public class SharedViewModel extends AndroidViewModel {
                         movimentacoes.setValue(movs);
                     }
                 });
+        isLoading.setValue(false);
     }
     public void carregarValoresAReceber(){
+        isLoading.setValue(true);
         db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado)
                 .collection(MainActivity.VALORES_A_RECEBER).get()
                 .addOnCompleteListener(task -> {
@@ -85,6 +91,7 @@ public class SharedViewModel extends AndroidViewModel {
                         valoresAReceber.setValue(valores);
                     }
                 });
+        isLoading.setValue(false);
     }
     public LiveData<Boolean> isLoading() {
         return isLoading;
@@ -165,22 +172,20 @@ public class SharedViewModel extends AndroidViewModel {
         dizimoPendente.setValue(dizimoAtual);
     }
 
-    public void addMovimentacaoFinanceira(MovimentacaoFinanceira movimentacaoFinanceira){
+    public void addMovimentacaoFinanceira(MovimentacaoFinanceira movimentacaoFinanceira, float valor, String tipo){
 
         isLoading.setValue(true);
         List<MovimentacaoFinanceira> movsAtuais = movimentacoes.getValue();
-        if (movsAtuais == null){
-            movsAtuais = new ArrayList<>();
-        }
-        List<MovimentacaoFinanceira> finalMovsAtuais = movimentacoes.getValue();
+
         db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado)
                 .collection(MainActivity.MOVIMENTACOES_FINANCEIRAS).add(movimentacaoFinanceira)
                 .addOnSuccessListener(documentReference -> {
                     isLoading.setValue(false);
                     mensagemDeAdicaoDeMovimentacao.setValue("Movimentação adicionada com sucesso");
                     Log.d("Sucesso ao add", "DocumentSnapshot added");
-                    finalMovsAtuais.add(movimentacaoFinanceira);
-                    movimentacoes.setValue(finalMovsAtuais);
+                    movsAtuais.add(movimentacaoFinanceira);
+                    movimentacoes.setValue(movsAtuais);
+                    atualizarSalarioEDizimo(valor, tipo);
                 })
                 .addOnFailureListener(e -> {
                     isLoading.setValue(false);
@@ -188,7 +193,24 @@ public class SharedViewModel extends AndroidViewModel {
                     Log.w("Falha ao add", "Error adding document", e);
                 });
     }
-
+    public void deletarMovimentacaoFinanceira(MovimentacaoFinanceira movimentacaoFinanceira, float valor, String tipo){
+        isLoading.setValue(true);
+        List<MovimentacaoFinanceira> movsAtuais = movimentacoes.getValue();
+        DocumentReference docRef = db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado)
+                .collection(MainActivity.MOVIMENTACOES_FINANCEIRAS).document(movimentacaoFinanceira.getID());
+        docRef.delete()
+                .addOnSuccessListener(unused -> {
+                    isLoading.setValue(false);
+                    movsAtuais.remove(movimentacaoFinanceira);
+                    movimentacoes.setValue(movsAtuais);
+                    atualizarSalarioEDizimo(-valor, tipo);
+                    mensagemDeExclusaoDeMovimentacao.setValue("Excluído com sucesso");
+                })
+                .addOnFailureListener(e -> {
+                    isLoading.setValue(false);
+                    mensagemDeExclusaoDeMovimentacao.setValue("Erro: " + e.getMessage());
+                });
+    }
     public void addValorAReceber(ValorAReceber valorAReceber){
         isLoading.setValue(true);
         List<ValorAReceber> valoresAtuais = valoresAReceber.getValue();

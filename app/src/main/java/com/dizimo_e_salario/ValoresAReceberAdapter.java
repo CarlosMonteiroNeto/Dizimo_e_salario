@@ -92,7 +92,7 @@ public class ValoresAReceberAdapter extends RecyclerView.Adapter<ValoresAReceber
         holder.btnExcluir.setOnClickListener(view -> {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(view.getContext());
             dialogBuilder.setTitle("Atenção!");
-            dialogBuilder.setMessage("Deseja excluir esta movimentação financeira?");
+            dialogBuilder.setMessage("Deseja excluir este valor a receber?");
             dialogBuilder.setPositiveButton("Sim", (dialog, which) -> viewModel.deletarValorAReceber(valorAReceber));
             dialogBuilder.setNegativeButton("Não", (dialogInterface, i) -> dialogInterface.dismiss());
             dialogBuilder.show();

@@ -40,7 +40,7 @@ public class HistoricoDeMovimentacoesActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         //É obrigatório chamar carregarViewModel após o construtor para inicializá-lo corretamente
         viewModel = ((MinhaAplicacao) getApplication()).getViewModel();
-        viewModel.carregarViewModel(usuarioLogado);
+//        viewModel.carregarViewModel(usuarioLogado);
         viewModel.carregarMovimentacoes();
 
         movimentacoesRecycler = findViewById(R.id.recyclerview_movimentacoes);
@@ -50,9 +50,10 @@ public class HistoricoDeMovimentacoesActivity extends AppCompatActivity {
         movimentacoesRecycler.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
         viewModel.getMovimentacoes().observe(HistoricoDeMovimentacoesActivity.this, movimentacoes -> adapter.atualizarItens(movimentacoes));
-        viewModel.getMensagemDeExclusaoDeMovimentacao().observe(HistoricoDeMovimentacoesActivity.this, mensagem -> {
-            Toast.makeText(this, mensagem, Toast.LENGTH_SHORT).show();
-        });
+
+        viewModel.getMensagemDeExclusaoDeMovimentacao().observe(HistoricoDeMovimentacoesActivity.this, mensagem ->
+                Toast.makeText(HistoricoDeMovimentacoesActivity.this, mensagem, Toast.LENGTH_SHORT).show());
+
         viewModel.isLoading().observe(HistoricoDeMovimentacoesActivity.this, isLoading ->{
             if (isLoading){
                 progressBar.setVisibility(View.VISIBLE);

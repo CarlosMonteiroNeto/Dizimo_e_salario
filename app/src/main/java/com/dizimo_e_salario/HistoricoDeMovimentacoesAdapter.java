@@ -87,17 +87,8 @@ public class HistoricoDeMovimentacoesAdapter extends RecyclerView.Adapter<Histor
             dialogBuilder.setTitle("Atenção!");
             dialogBuilder.setMessage("Deseja excluir esta movimentação financeira?");
             dialogBuilder.setPositiveButton("Sim", (dialog, which) -> {
-                List<MovimentacaoFinanceira> movimentacoesAtuais = viewModel.getMovimentacoes().getValue();
-                DocumentReference docRef = db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado)
-                        .collection(MainActivity.MOVIMENTACOES_FINANCEIRAS).document(id);
-                docRef.delete()
-                        .addOnSuccessListener(unused -> {
-                            movimentacoesAtuais.remove(movimentacaoFinanceira);
-                            viewModel.setMovimentacoes(movimentacoesAtuais);
-                            viewModel.atualizarSalarioEDizimo(-Float.parseFloat(MainActivity.removerMascara(valor)), tipo);
-                            Toast.makeText(view.getContext(), "Excluído com sucesso", Toast.LENGTH_SHORT).show();
-                        })
-                        .addOnFailureListener(e -> Toast.makeText(view.getContext(), "Falha na exclusão. tente novamente", Toast.LENGTH_SHORT).show());
+                float valorMovimentado = Float.parseFloat(MainActivity.removerMascara(valor));
+                viewModel.deletarMovimentacaoFinanceira(movimentacaoFinanceira, valorMovimentado, tipo);
             });
             dialogBuilder.setNegativeButton("Não", (dialogInterface, i) -> dialogInterface.dismiss());
             dialogBuilder.show();

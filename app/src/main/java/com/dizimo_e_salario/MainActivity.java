@@ -126,8 +126,9 @@ public class MainActivity extends AppCompatActivity {
                 movimentacaoFinanceira.setValor(edtTxtValorDaMovimentacao.getText().toString());
                 movimentacaoFinanceira.setDescricao(editDescricao.getText().toString());
                 movimentacaoFinanceira.setData(new Date().getTime());
-
-                viewModel.addMovimentacaoFinanceira(movimentacaoFinanceira);
+                valorMovimentado = Float.parseFloat(removerMascara(edtTxtValorDaMovimentacao.getText().toString()));
+                tipoDeMovimentacao = spnTiposDeMovimentacao.getSelectedItem().toString();
+                viewModel.addMovimentacaoFinanceira(movimentacaoFinanceira, valorMovimentado, tipoDeMovimentacao);
             }
         });
 
@@ -146,10 +147,8 @@ public class MainActivity extends AppCompatActivity {
         });
         viewModel.getMensagemDeAdicaoDeMovimentacao().observe(MainActivity.this, mensagem -> {
             if(Objects.equals(mensagem, "Movimentação adicionada com sucesso")){
-                valorMovimentado = Float.parseFloat(removerMascara(edtTxtValorDaMovimentacao.getText().toString()));
-                tipoDeMovimentacao = spnTiposDeMovimentacao.getSelectedItem().toString();
-                viewModel.atualizarSalarioEDizimo(valorMovimentado, tipoDeMovimentacao);
                 edtTxtValorDaMovimentacao.setText("");
+                editDescricao.setText("");
             }
             Toast.makeText(this, mensagem, Toast.LENGTH_SHORT).show();
         });
