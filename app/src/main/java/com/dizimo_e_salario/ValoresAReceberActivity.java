@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +29,8 @@ public class ValoresAReceberActivity extends AppCompatActivity {
     ImageButton btnAddValorAReceber;
     TextView subAddValorAReceber;
     ValoresAReceberAdapter adapter;
+    ProgressBar progressBar;
+    View blockingView;
 
     SharedViewModel viewModel;
     String usuarioLogado;
@@ -38,6 +41,8 @@ public class ValoresAReceberActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         //TODO AJUSTAR layout
         setContentView(R.layout.activity_valores_a_receber);
+        progressBar = findViewById(R.id.progressBar);
+        blockingView = findViewById(R.id.blockingView);
 
         SharedPreferences preferences = getSharedPreferences(LoginActivity.DADOS_DE_LOGIN, Context.MODE_PRIVATE);
         usuarioLogado = preferences.getString(LoginActivity.CHAVE_USUARIO, LoginActivity.USUARIO_PADRAO);
@@ -45,7 +50,7 @@ public class ValoresAReceberActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         //É obrigatório chamar carregarViewModel após o construtor para inicializá-lo corretamente
         viewModel = ((MinhaAplicacao) getApplication()).getViewModel();
-        viewModel.carregarViewModel(usuarioLogado);
+//        viewModel.carregarViewModel(usuarioLogado);
         viewModel.carregarValoresAReceber();
 
         valoresAReceberRecycler = findViewById(R.id.recyclerview_valores_a_receber);
@@ -62,20 +67,25 @@ public class ValoresAReceberActivity extends AppCompatActivity {
                 Intent dados = result.getData();
                 if(dados != null && dados.hasExtra("Valor a receber")){
                     ValorAReceber valorNovo = (ValorAReceber) dados.getSerializableExtra("Valor a receber");
-                    viewModel.addValorAReceber(valorNovo).observe(this, mensagem -> {
-                        if (mensagem != null) {
-                            Toast.makeText(this, mensagem, Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    viewModel.addValorAReceber(valorNovo);
                 }
             }
         });
         btnAddValorAReceber.setOnClickListener(v -> launcher.launch(new Intent(ValoresAReceberActivity.this, AddValorAReceberActivity.class)));
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+        viewModel.getMensagemDeAddValorAReceber().observe(ValoresAReceberActivity.this, mensagem ->
+                Toast.makeText(this, mensagem, Toast.LENGTH_SHORT).show());
+        viewModel.getMensagemDeExclusaoDeValoresAReceber().observe(ValoresAReceberActivity.this, mensagem ->
+                Toast.makeText(this, mensagem, Toast.LENGTH_SHORT).show());
+        viewModel.isLoading().observe(ValoresAReceberActivity.this, isLoading ->{
+            if (isLoading){
+                progressBar.setVisibility(View.VISIBLE);
+                blockingView.setVisibility(View.VISIBLE);
+            } else {
+                progressBar.setVisibility(View.GONE);
+                blockingView.setVisibility(View.GONE);
+            }
+        });
         viewModel.getValoresAReceber().observe(ValoresAReceberActivity.this, valores -> adapter.atualizarItens(valores));
     }
 }

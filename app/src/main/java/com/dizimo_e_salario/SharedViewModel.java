@@ -2,37 +2,36 @@ package com.dizimo_e_salario;
 
 import android.app.Application;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class SharedViewModel extends AndroidViewModel {
 
     private final FirebaseFirestore db;
-    private MutableLiveData<List<MovimentacaoFinanceira>> movimentacoes;
-    private MutableLiveData<List<ValorAReceber>> valoresAReceber;
-    private MutableLiveData<String>mensagemDeExclusao;
-    private MutableLiveData<String>mensagemDeAdicao;
+    private MutableLiveData<List<MovimentacaoFinanceira>> movimentacoes = new MutableLiveData<>();
+    private MutableLiveData<List<ValorAReceber>> valoresAReceber = new MutableLiveData<>();
+    private MutableLiveData<String> mensagemDeExclusaoDeValoresAReceber = new MutableLiveData<>();
+    private MutableLiveData<String> mensagemDeExclusaoDeMovimentacao = new MutableLiveData<>();
+    private MutableLiveData<String> mensagemDeAdicaoDeMovimentacao = new MutableLiveData<>();
+    private MutableLiveData<String> mensagemDeAddValorAReceber = new MutableLiveData<>();
     public static final String SALARIO_RESTANTE = "Salário restante";
     public static final String DIZIMO_PENDENTE = "Dízimo pendente";
     private final MutableLiveData<Float>salarioRestante = new MutableLiveData<>();
     private final MutableLiveData<Float>dizimoPendente = new MutableLiveData<>();
+    private MutableLiveData<Boolean> isLoading = new MutableLiveData<>();
     DocumentReference financeRef;
     private String usuarioLogado = "";
 
@@ -87,6 +86,9 @@ public class SharedViewModel extends AndroidViewModel {
                     }
                 });
     }
+    public LiveData<Boolean> isLoading() {
+        return isLoading;
+    }
     public MutableLiveData<List<MovimentacaoFinanceira>> getMovimentacoes(){
         return movimentacoes;
     }
@@ -95,8 +97,20 @@ public class SharedViewModel extends AndroidViewModel {
         return valoresAReceber;
     }
 
-    public MutableLiveData<String> getMensagemDeExclusao() {
-        return mensagemDeExclusao;
+    public MutableLiveData<String> getMensagemDeAddValorAReceber() {
+        return mensagemDeAddValorAReceber;
+    }
+
+    public MutableLiveData<String> getMensagemDeExclusaoDeValoresAReceber() {
+        return mensagemDeExclusaoDeValoresAReceber;
+    }
+
+    public MutableLiveData<String> getMensagemDeAdicaoDeMovimentacao() {
+        return mensagemDeAdicaoDeMovimentacao;
+    }
+
+    public MutableLiveData<String> getMensagemDeExclusaoDeMovimentacao() {
+        return mensagemDeExclusaoDeMovimentacao;
     }
 
     public MutableLiveData<Float> getDizimoPendente() {
@@ -151,40 +165,69 @@ public class SharedViewModel extends AndroidViewModel {
         dizimoPendente.setValue(dizimoAtual);
     }
 
-    public MutableLiveData<String> addValorAReceber(ValorAReceber valorAReceber){
+    public void addMovimentacaoFinanceira(MovimentacaoFinanceira movimentacaoFinanceira){
+
+        isLoading.setValue(true);
+        List<MovimentacaoFinanceira> movsAtuais = movimentacoes.getValue();
+        if (movsAtuais == null){
+            movsAtuais = new ArrayList<>();
+        }
+        List<MovimentacaoFinanceira> finalMovsAtuais = movimentacoes.getValue();
+        db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado)
+                .collection(MainActivity.MOVIMENTACOES_FINANCEIRAS).add(movimentacaoFinanceira)
+                .addOnSuccessListener(documentReference -> {
+                    isLoading.setValue(false);
+                    mensagemDeAdicaoDeMovimentacao.setValue("Movimentação adicionada com sucesso");
+                    Log.d("Sucesso ao add", "DocumentSnapshot added");
+                    finalMovsAtuais.add(movimentacaoFinanceira);
+                    movimentacoes.setValue(finalMovsAtuais);
+                })
+                .addOnFailureListener(e -> {
+                    isLoading.setValue(false);
+                    mensagemDeAdicaoDeMovimentacao.setValue("Erro: " + e.getMessage());
+                    Log.w("Falha ao add", "Error adding document", e);
+                });
+    }
+
+    public void addValorAReceber(ValorAReceber valorAReceber){
+        isLoading.setValue(true);
         List<ValorAReceber> valoresAtuais = valoresAReceber.getValue();
-        MutableLiveData<String> mensagem = new MutableLiveData<>();
         if (valoresAtuais == null){
             valoresAtuais = new ArrayList<>();
         }
 
+        List<ValorAReceber> finalValoresAtuais = valoresAtuais;
         db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado)
                 .collection(MainActivity.VALORES_A_RECEBER).add(valorAReceber)
                 .addOnSuccessListener(documentReference -> {
-                    mensagem.setValue("Contato adicionado com sucesso");
+                    isLoading.setValue(false);
+                    mensagemDeAddValorAReceber.setValue("Valor adicionado com sucesso");
                     Log.d("Sucesso ao add", "DocumentSnapshot added");
+                    finalValoresAtuais.add(valorAReceber);
+                    valoresAReceber.setValue(finalValoresAtuais);
                 })
                 .addOnFailureListener(e -> {
-                    mensagem.setValue("Erro: " + e.getMessage());
+                    isLoading.setValue(false);
+                    mensagemDeAddValorAReceber.setValue("Erro: " + e.getMessage());
                     Log.w("Falha ao add", "Error adding document", e);
                 });
-        valoresAtuais.add(valorAReceber);
-        valoresAReceber.setValue(valoresAtuais);
-        return mensagem;
     }
-    public MutableLiveData<String> deletarValorAReceber(ValorAReceber valorAReceber){
-        MutableLiveData<String> mensagem = new MutableLiveData<>();
+    public void deletarValorAReceber(ValorAReceber valorAReceber){
+        isLoading.setValue(true);
         List<ValorAReceber> valoresAtuais = valoresAReceber.getValue();
         DocumentReference docRef = db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado)
                 .collection(MainActivity.VALORES_A_RECEBER).document(valorAReceber.getId());
         docRef.delete()
                 .addOnSuccessListener(unused -> {
+                    isLoading.setValue(false);
                     valoresAtuais.remove(valorAReceber);
                     valoresAReceber.setValue(valoresAtuais);
-                    mensagem.setValue("Excluído com sucesso");
+                    mensagemDeExclusaoDeValoresAReceber.setValue("Excluído com sucesso");
                 })
-                .addOnFailureListener(e -> mensagem.setValue("Falha ao excluir"));
-        return mensagem;
+                .addOnFailureListener(e -> {
+                    isLoading.setValue(false);
+                    mensagemDeExclusaoDeValoresAReceber.setValue("Erro: " + e.getMessage());
+                });
     }
 //    public void excluirMovimentacao(MovimentacaoFinanceira movimentacaoFinanceira){
 //        List<MovimentacaoFinanceira> movimentacoesAtuais = new ArrayList<>();

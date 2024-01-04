@@ -93,7 +93,7 @@ public class ValoresAReceberAdapter extends RecyclerView.Adapter<ValoresAReceber
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(view.getContext());
             dialogBuilder.setTitle("Atenção!");
             dialogBuilder.setMessage("Deseja excluir esta movimentação financeira?");
-            dialogBuilder.setPositiveButton("Sim", (dialog, which) -> viewModel.getMensagemDeExclusao().setValue(viewModel.deletarValorAReceber(valorAReceber).getValue()));
+            dialogBuilder.setPositiveButton("Sim", (dialog, which) -> viewModel.deletarValorAReceber(valorAReceber));
             dialogBuilder.setNegativeButton("Não", (dialogInterface, i) -> dialogInterface.dismiss());
             dialogBuilder.show();
 
@@ -135,7 +135,7 @@ public class ValoresAReceberAdapter extends RecyclerView.Adapter<ValoresAReceber
         hoje.add(Calendar.HOUR_OF_DAY, 24);
         long milissegundos24HorasDepois = hoje.getTimeInMillis();
 
-        if (dataDePagar > milissegundos24HorasDepois) {
+        if (dataDePagar < milissegundos24HorasDepois) {
             holder.itemView.setBackgroundColor(Color.GRAY);
         } else {
             holder.itemView.setBackgroundColor(Color.TRANSPARENT);

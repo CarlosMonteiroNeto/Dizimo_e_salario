@@ -36,7 +36,7 @@
 
     <EditText
         android:id="@+id/nome_do_devedor"
-        android:layout_width="wrap_content"
+        android:layout_width="270dp"
         android:layout_height="wrap_content"
         android:layout_margin="5sp"
         android:inputType="textPersonName"
@@ -61,7 +61,7 @@
 
     <EditText
         android:id="@+id/valor_devido"
-        android:layout_width="wrap_content"
+        android:layout_width="270dp"
         android:layout_height="wrap_content"
         android:layout_margin="5sp"
         android:inputType="number"
@@ -109,7 +109,7 @@
 
     <com.vicmikhailau.maskededittext.MaskedEditText
         android:id="@+id/edit_data_de_pagamento"
-        android:layout_width="wrap_content"
+        android:layout_width="270dp"
         android:layout_height="wrap_content"
         android:layout_margin="5sp"
         android:inputType="number"

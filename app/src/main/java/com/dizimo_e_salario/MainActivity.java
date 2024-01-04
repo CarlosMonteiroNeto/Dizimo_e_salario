@@ -16,9 +16,9 @@ import android.widget.Toast;
 
 import com.dizimo_e_salario.canarinho.formatador.FormatadorValor;
 import com.dizimo_e_salario.canarinho.watcher.ValorMonetarioWatcher;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Date;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,10 +40,8 @@ public class MainActivity extends AppCompatActivity {
     public static final String MOVIMENTACOES_FINANCEIRAS = "Movimentações financeiras";
     public static final String VALORES_A_RECEBER = "Valores a receber";
     public static final String INFORMACOES_PRINCIPAIS = "Informações principais";
-
-    FirebaseFirestore db;
-    Float salarioRestante;
-    Float dizimoPendente;
+    float valorMovimentado;
+    String tipoDeMovimentacao;
     SharedViewModel viewModel;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,13 +53,9 @@ public class MainActivity extends AppCompatActivity {
 
         usuarioLogado = sharedPreferences.getString(LoginActivity.CHAVE_USUARIO, LoginActivity.USUARIO_PADRAO);
 
-        salarioRestante = 0.00f;
-        dizimoPendente = 0.00f;
         //É obrigatório chamar carregarViewModel após o construtor para inicializá-lo corretamente
         viewModel = ((MinhaAplicacao) getApplication()).getViewModel();
         viewModel.carregarViewModel(usuarioLogado);
-        viewModel.carregarMovimentacoes();
-        db = FirebaseFirestore.getInstance();
 
 //        SharedPreferences sharedPreferences = getSharedPreferences("saldos", Context.MODE_PRIVATE);
 //        SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -113,9 +107,9 @@ public class MainActivity extends AppCompatActivity {
         botaoRegistrar.setOnClickListener(v -> {
             if (edtTxtValorDaMovimentacao.getText().toString().trim().isEmpty()
                     || editDescricao.getText().toString().trim().isEmpty()
-                    || spnTiposDeMovimentacao.getSelectedItem().toString().isEmpty()){
+                    || spnTiposDeMovimentacao.getSelectedItem().toString().isEmpty()) {
 
-                if (edtTxtValorDaMovimentacao.getText().toString().trim().isEmpty()){
+                if (edtTxtValorDaMovimentacao.getText().toString().trim().isEmpty()) {
                     edtTxtValorDaMovimentacao.setError("O valor está em branco");
                 }
                 if (editDescricao.getText().toString().trim().isEmpty()) {
@@ -125,8 +119,6 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Selecione um tipo de movimentação financeira", Toast.LENGTH_LONG).show();
                 }
             } else {
-                float valorMovimentado = Float.parseFloat(removerMascara(edtTxtValorDaMovimentacao.getText().toString()));
-                String tipoDeMovimentacao = spnTiposDeMovimentacao.getSelectedItem().toString();
 
                 MovimentacaoFinanceira movimentacaoFinanceira = new MovimentacaoFinanceira();
 //                movimentacaoFinanceira.setID(UUID.randomUUID().toString());
@@ -135,16 +127,10 @@ public class MainActivity extends AppCompatActivity {
                 movimentacaoFinanceira.setDescricao(editDescricao.getText().toString());
                 movimentacaoFinanceira.setData(new Date().getTime());
 
-                db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado)
-                        .collection(MOVIMENTACOES_FINANCEIRAS).add(movimentacaoFinanceira)
-                        .addOnSuccessListener(documentReference -> {
-                    viewModel.atualizarSalarioEDizimo(valorMovimentado, tipoDeMovimentacao);
-                    edtTxtValorDaMovimentacao.setText("");
-                    Toast.makeText(v.getContext(), "Adicionado com sucesso", Toast.LENGTH_SHORT).show();
-                })
-                        .addOnFailureListener(exception -> Toast.makeText(v.getContext(), "Falha. tente novamente", Toast.LENGTH_SHORT).show());
+                viewModel.addMovimentacaoFinanceira(movimentacaoFinanceira);
             }
         });
+
         botaoHistoricoDeMovimentacoes = findViewById(R.id.botao_historico);
         botaoHistoricoDeMovimentacoes.setOnClickListener(v -> startActivity(new Intent(this, HistoricoDeMovimentacoesActivity.class)));
 
@@ -158,19 +144,22 @@ public class MainActivity extends AppCompatActivity {
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         });
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        viewModel.getDizimoPendente().observe(this, dizimo ->
+        viewModel.getMensagemDeAdicaoDeMovimentacao().observe(MainActivity.this, mensagem -> {
+            if(Objects.equals(mensagem, "Movimentação adicionada com sucesso")){
+                valorMovimentado = Float.parseFloat(removerMascara(edtTxtValorDaMovimentacao.getText().toString()));
+                tipoDeMovimentacao = spnTiposDeMovimentacao.getSelectedItem().toString();
+                viewModel.atualizarSalarioEDizimo(valorMovimentado, tipoDeMovimentacao);
+                edtTxtValorDaMovimentacao.setText("");
+            }
+            Toast.makeText(this, mensagem, Toast.LENGTH_SHORT).show();
+        });
+        viewModel.getDizimoPendente().observe(MainActivity.this, dizimo ->
                 valorDizimoPendente.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(dizimo/100))));
-        viewModel.getSalarioRestante().observe(this, salario ->
+        viewModel.getSalarioRestante().observe(MainActivity.this, salario ->
                 valorSalarioRestante.setText(FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(salario/100))));
     }
 
     public static String removerMascara(String textoComMascara) {
-        return textoComMascara.replaceAll("[^0-9]", "");
+        return textoComMascara.replaceAll("[^0-9-]", "");
     }
 }
