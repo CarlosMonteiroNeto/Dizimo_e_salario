@@ -2,22 +2,24 @@ package com.dizimo_e_salario;
 
 import android.app.AlertDialog;
 import android.graphics.Color;
+import android.text.InputType;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.dizimo_e_salario.canarinho.formatador.FormatadorValor;
-import com.google.firebase.firestore.DocumentReference;
+import com.dizimo_e_salario.canarinho.watcher.ValorMonetarioWatcher;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.vicmikhailau.maskededittext.MaskedEditText;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
@@ -62,6 +64,187 @@ public class ValoresAReceberAdapter extends RecyclerView.Adapter<ValoresAReceber
         holder.descricao.setText(descricao);
         holder.data.setText(new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date(data)));
         marcarDatasVencidas(data, holder);
+
+        holder.btnReceberValor.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+            builder.setTitle("Valor total: " + FormatadorValor.VALOR_COM_SIMBOLO.formata(String.valueOf(valor/100)) + ". Qual o valor pago?");
+
+            final EditText input = new EditText(v.getContext());
+            input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            input.addTextChangedListener(new ValorMonetarioWatcher.Builder()
+                    .comSimboloReal()
+                    .comMantemZerosAoLimpar()
+                    .build());
+            builder.setView(input);
+
+            builder.setPositiveButton("Confirmar", (dialog, which) -> {
+                String inputText = input.getText().toString();
+                float valorPago = Float.parseFloat(MainActivity.removerMascara(input.getText().toString()));
+                if (inputText.trim().isEmpty() || valorPago > valor) {
+                    if (inputText.trim().isEmpty()) {
+                        input.setError("O valor está em branco");
+                    } else {
+                        input.setError("Pagamento maior que a dívida");
+                    }
+                } else {
+                    if (valorPago == valor) {
+                        viewModel.deletarValorAReceber(valorAReceber);
+                    } else {
+                        valorAReceber.setValor(valor-valorPago);
+                        viewModel.alterarValorAReceber(position, valorAReceber);
+                    }
+                    MovimentacaoFinanceira movimentacao = new MovimentacaoFinanceira();
+                    movimentacao.setTipo("Entrada");
+                    movimentacao.setValor(inputText);
+                    movimentacao.setDescricao(valorAReceber.getCliente() + " - " + valorAReceber.getDescricao());
+                    movimentacao.setData(new Date().getTime());
+                    viewModel.addMovimentacaoFinanceira(movimentacao, valorPago, movimentacao.getTipo());
+                    dialog.dismiss();
+                }
+            });
+            builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.cancel());
+            builder.show();
+        });
+
+        holder.btnEditar.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+            builder.setTitle("Data atual: " + new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date(data)) + ". Qual a nova data");
+
+            AttributeSet attrs= new AttributeSet() {
+                @Override
+                public int getAttributeCount() {
+                    return 0;
+                }
+
+                @Override
+                public String getAttributeName(int index) {
+                    return null;
+                }
+
+                @Override
+                public String getAttributeValue(int index) {
+                    return null;
+                }
+
+                @Override
+                public String getAttributeValue(String namespace, String name) {
+                    return null;
+                }
+
+                @Override
+                public String getPositionDescription() {
+                    return null;
+                }
+
+                @Override
+                public int getAttributeNameResource(int index) {
+                    return 0;
+                }
+
+                @Override
+                public int getAttributeListValue(String namespace, String attribute, String[] options, int defaultValue) {
+                    return 0;
+                }
+
+                @Override
+                public boolean getAttributeBooleanValue(String namespace, String attribute, boolean defaultValue) {
+                    return false;
+                }
+
+                @Override
+                public int getAttributeResourceValue(String namespace, String attribute, int defaultValue) {
+                    return 0;
+                }
+
+                @Override
+                public int getAttributeIntValue(String namespace, String attribute, int defaultValue) {
+                    return 0;
+                }
+
+                @Override
+                public int getAttributeUnsignedIntValue(String namespace, String attribute, int defaultValue) {
+                    return 0;
+                }
+
+                @Override
+                public float getAttributeFloatValue(String namespace, String attribute, float defaultValue) {
+                    return 0;
+                }
+
+                @Override
+                public int getAttributeListValue(int index, String[] options, int defaultValue) {
+                    return 0;
+                }
+
+                @Override
+                public boolean getAttributeBooleanValue(int index, boolean defaultValue) {
+                    return false;
+                }
+
+                @Override
+                public int getAttributeResourceValue(int index, int defaultValue) {
+                    return 0;
+                }
+
+                @Override
+                public int getAttributeIntValue(int index, int defaultValue) {
+                    return 0;
+                }
+
+                @Override
+                public int getAttributeUnsignedIntValue(int index, int defaultValue) {
+                    return 0;
+                }
+
+                @Override
+                public float getAttributeFloatValue(int index, float defaultValue) {
+                    return 0;
+                }
+
+                @Override
+                public String getIdAttribute() {
+                    return null;
+                }
+
+                @Override
+                public String getClassAttribute() {
+                    return null;
+                }
+
+                @Override
+                public int getIdAttributeResourceValue(int defaultValue) {
+                    return 0;
+                }
+
+                @Override
+                public int getStyleAttribute() {
+                    return 0;
+                }
+            };
+            final MaskedEditText input = new MaskedEditText(v.getContext(), attrs);
+            input.setMask("##/##/####");
+            input.setInputType(InputType.TYPE_CLASS_NUMBER);
+            builder.setView(input);
+
+            builder.setPositiveButton("Confirmar", (dialog, which) -> {
+                String inputText = input.getText().toString();
+                if (!AddValorAReceberActivity.EhdataSulamericanaValida(inputText)) {
+                    input.setError("Data inválida");
+                } else {
+                    try {
+                        long novaData = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                                .parse(inputText).getTime();
+                        valorAReceber.setData(novaData);
+                        viewModel.alterarDataDaDivida(position, valorAReceber);
+                        dialog.dismiss();
+                    } catch (ParseException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+            builder.setNegativeButton("Cancelar", (dialog, which) -> dialog.cancel());
+            builder.show();
+        });
 
 
 //        holder.btnEditar.setOnClickListener(view -> {
@@ -111,7 +294,7 @@ public class ValoresAReceberAdapter extends RecyclerView.Adapter<ValoresAReceber
 
     public static class ValoresAReceberViewHolder extends RecyclerView.ViewHolder{
         public TextView clienteDevedor, valor, descricao, data;
-        public ImageButton btnEditar, btnExcluir;
+        public ImageButton btnReceberValor, btnEditar, btnExcluir;
         public ValoresAReceberViewHolder(@NonNull View itemView) {
             super(itemView);
 
@@ -119,6 +302,7 @@ public class ValoresAReceberAdapter extends RecyclerView.Adapter<ValoresAReceber
             valor = itemView.findViewById(R.id.valor_a_receber);
             descricao = itemView.findViewById(R.id.descricao_para_receber);
             data = itemView.findViewById(R.id.data_para_receber);
+            btnReceberValor = itemView.findViewById(R.id.botao_receber_valor);
             btnEditar = itemView.findViewById(R.id.botao_editar_valor_a_receber);
             btnExcluir = itemView.findViewById(R.id.botao_excluir_valor_a_receber);
         }

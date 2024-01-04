@@ -39,6 +39,14 @@
         android:textSize="18sp" />
 
     <ImageButton
+        android:id="@+id/botao_receber_valor"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
+        android:background="@android:drawable/checkbox_on_background" />
+
+    <ImageButton
         android:id="@+id/botao_editar_valor_a_receber"
         android:layout_width="30dp"
         android:layout_height="30dp"

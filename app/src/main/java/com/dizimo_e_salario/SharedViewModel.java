@@ -10,6 +10,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -42,6 +44,7 @@ public class SharedViewModel extends AndroidViewModel {
     public void carregarViewModel(String usuarioLogado){
         isLoading.setValue(true);
         movimentacoes.setValue(new ArrayList<>());
+        valoresAReceber.setValue(new ArrayList<>());
         this.usuarioLogado = usuarioLogado;
         financeRef = db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado);
         financeRef.get().addOnSuccessListener(documentSnapshot -> {
@@ -233,6 +236,31 @@ public class SharedViewModel extends AndroidViewModel {
                     mensagemDeAddValorAReceber.setValue("Erro: " + e.getMessage());
                     Log.w("Falha ao add", "Error adding document", e);
                 });
+    }
+
+    public void alterarValorAReceber(int position, ValorAReceber valorAReceber){
+        isLoading.setValue(true);
+        List<ValorAReceber> valoresAtuais = valoresAReceber.getValue();
+        DocumentReference docRef = db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado)
+                .collection(MainActivity.VALORES_A_RECEBER).document(valorAReceber.getId());
+        docRef.update("valor", valorAReceber.getValor()).addOnSuccessListener(unused -> {
+            valoresAtuais.set(position, valorAReceber);
+            valoresAReceber.setValue(valoresAtuais);
+            isLoading.setValue(false);
+        }).addOnFailureListener(e -> isLoading.setValue(false));
+
+    }
+    public void alterarDataDaDivida (int position, ValorAReceber valorAReceber){
+        isLoading.setValue(true);
+        List<ValorAReceber> valoresAtuais = valoresAReceber.getValue();
+        DocumentReference docRef = db.collection(LoginActivity.CHAVE_USUARIO).document(usuarioLogado)
+                .collection(MainActivity.VALORES_A_RECEBER).document(valorAReceber.getId());
+        docRef.update("data", valorAReceber.getData()).addOnSuccessListener(unused -> {
+            valoresAtuais.set(position, valorAReceber);
+            valoresAReceber.setValue(valoresAtuais);
+            isLoading.setValue(false);
+        }).addOnFailureListener(e -> isLoading.setValue(false));
+
     }
     public void deletarValorAReceber(ValorAReceber valorAReceber){
         isLoading.setValue(true);

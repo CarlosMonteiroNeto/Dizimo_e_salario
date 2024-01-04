@@ -52,6 +52,7 @@ public class ValoresAReceberActivity extends AppCompatActivity {
         viewModel = ((MinhaAplicacao) getApplication()).getViewModel();
 //        viewModel.carregarViewModel(usuarioLogado);
         viewModel.carregarValoresAReceber();
+        viewModel.carregarMovimentacoes();
 
         valoresAReceberRecycler = findViewById(R.id.recyclerview_valores_a_receber);
         adapter = new ValoresAReceberAdapter(new ArrayList<>(), db, viewModel, usuarioLogado);

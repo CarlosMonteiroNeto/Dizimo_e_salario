@@ -83,7 +83,7 @@ public class AddValorAReceberActivity extends AppCompatActivity {
 
     }
 
-    public boolean EhdataSulamericanaValida(String date) {
+    public static boolean EhdataSulamericanaValida(String date) {
         // Verifica o padrão da string usando uma expressão regular
         if (!date.matches("\\d{2}/\\d{2}/\\d{4}")) {
             return false; // Não corresponde ao padrão "##/##/####"
